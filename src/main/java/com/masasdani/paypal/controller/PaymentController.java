@@ -92,7 +92,9 @@ public class PaymentController {
 	@RequestMapping(method = RequestMethod.POST, value = "pay/verify")
 	public String payWehook(@RequestBody JSONObject jsonObject){
 		String pId = jsonObject.get("paymentId").toString();
-		String uId = jsonObject.get("uid").toString();
+		String phone = jsonObject.get("phone").toString();
+        String sql_uid = "select *from account where phone=" + phone;
+        int uId = DBHelper.select_data(sql_uid,"id");
 		Double amount = Double.parseDouble(jsonObject.get("amount").toString());
 
         System.out.println("paymentId:"+pId+" uid:"+uId+" amount:"+amount);
@@ -107,13 +109,13 @@ public class PaymentController {
         if (success) {
             System.out.println("支付完成");
             String sql = "select * from finace where account_id=" + uId;
-            double balance = DBHelper.select_balance(sql) + amount*100;
+            double balance = DBHelper.select_data(sql,"balance") + amount*100;
 
 //            String sql1 = "update finace set balance=? where account_id=" + uId;
 //            DBHelper.update_balance(sql1,balance);
             final JSONObject financeJson = new JSONObject();
             try {
-                financeJson.put("uid", Integer.parseInt(uId));
+                financeJson.put("uid", uId);
                 financeJson.put("balance", balance);
             } catch (Exception e) {
                 e.printStackTrace();
