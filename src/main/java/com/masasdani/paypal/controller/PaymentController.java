@@ -2,13 +2,14 @@ package com.masasdani.paypal.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.masasdani.paypal.service.DBHelper;
+import com.masasdani.paypal.service.PayPalVerifyPayment;
+import com.masasdani.paypal.util.HttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import com.masasdani.paypal.config.PaypalPaymentIntent;
 import com.masasdani.paypal.config.PaypalPaymentMethod;
@@ -17,6 +18,16 @@ import com.masasdani.paypal.util.URLUtils;
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
+import net.sf.json.JSONObject;
+
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 
 @Controller
 @RequestMapping("/")
@@ -34,19 +45,19 @@ public class PaymentController {
 	public String index(){
 		return "index";
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "pay")
 	public String pay(HttpServletRequest request){
 		String cancelUrl = URLUtils.getBaseURl(request) + "/" + PAYPAL_CANCEL_URL;
 		String successUrl = URLUtils.getBaseURl(request) + "/" + PAYPAL_SUCCESS_URL;
 		try {
 			Payment payment = paypalService.createPayment(
-					4.00, 
-					"USD", 
-					PaypalPaymentMethod.paypal, 
+					4.00,
+					"USD",
+					PaypalPaymentMethod.paypal,
 					PaypalPaymentIntent.sale,
-					"payment description", 
-					cancelUrl, 
+					"payment description",
+					cancelUrl,
 					successUrl);
 			for(Links links : payment.getLinks()){
 				if(links.getRel().equals("approval_url")){
@@ -76,5 +87,46 @@ public class PaymentController {
 		}
 		return "redirect:/";
 	}
-	
+
+	@ResponseBody
+	@RequestMapping(method = RequestMethod.POST, value = "pay/verify")
+	public String payWehook(@RequestBody JSONObject jsonObject){
+		String pId = jsonObject.get("paymentId").toString();
+		String uId = jsonObject.get("uid").toString();
+		Double amount = Double.parseDouble(jsonObject.get("amount").toString());
+
+        System.out.println("paymentId:"+pId+" uid:"+uId+" amount:"+amount);
+        PayPalVerifyPayment paymentV = new PayPalVerifyPayment();
+        boolean success = false;
+        try {
+            success = paymentV.verifyPayment(pId,amount);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (success) {
+            System.out.println("支付完成");
+            String sql = "select * from finace where account_id=" + uId;
+            double balance = DBHelper.select_balance(sql) + amount*100;
+
+//            String sql1 = "update finace set balance=? where account_id=" + uId;
+//            DBHelper.update_balance(sql1,balance);
+            final JSONObject financeJson = new JSONObject();
+            try {
+                financeJson.put("uid", uId);
+                financeJson.put("balance", balance);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            JSONObject ret = HttpClientUtil.doPost("http://abj-elogic-test1.yunba.io:9002/admin_api/finace?appkey=56a0a88c4407a3cd028ac2fe",financeJson);
+            String status = ret.get("status").toString();
+            if (status.equals("0")) {
+                System.out.println("余额更新成功!");
+            }
+        } else {
+            System.out.println("支付校验失败");
+        }
+		return null;
+	}
+
 }
