@@ -113,7 +113,7 @@ public class PaymentController {
 //            DBHelper.update_balance(sql1,balance);
             final JSONObject financeJson = new JSONObject();
             try {
-                financeJson.put("uid", uId);
+                financeJson.put("uid", Integer.parseInt(uId));
                 financeJson.put("balance", balance);
             } catch (Exception e) {
                 e.printStackTrace();
