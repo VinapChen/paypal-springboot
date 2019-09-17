@@ -69,7 +69,7 @@ public class DBHelper {
             e.printStackTrace();
         }
     }
-    public static int select_balance (String sql){
+    public static int select_data (String sql, String retcow){
 //        System.out.println("sql exe:"+sql);
         try
         {
@@ -78,7 +78,7 @@ public class DBHelper {
                 pst = conn.prepareStatement(sql);
                 rs = pst.executeQuery();
                 while (rs.next()) {
-                    return rs.getInt("balance");
+                    return rs.getInt(retcow);
                 }
                 try {
                     if (rs != null)
