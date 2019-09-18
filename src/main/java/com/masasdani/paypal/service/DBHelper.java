@@ -92,11 +92,15 @@ public class DBHelper {
             else
             {
                 System.out.println("数据库连接异常！");
+                System.out.println("数据库重连中。。。");
+                init();
             }
         }
         catch(Exception ex)
         {
             ex.printStackTrace();
+            System.out.println("数据库重连中。。。");
+            init();
         }
 
         return 0;

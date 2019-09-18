@@ -29,6 +29,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
+import java.util.Date;
+
 @Controller
 @RequestMapping("/")
 public class PaymentController {
@@ -96,7 +98,7 @@ public class PaymentController {
         String sql_uid = "select *from account where phone=" + phone;
         int uId = DBHelper.select_data(sql_uid,"id");
 		Double amount = Double.parseDouble(jsonObject.get("amount").toString());
-
+		System.out.println(new Date());
         System.out.println("paymentId:"+pId+" uid:"+uId+" amount:"+amount);
         PayPalVerifyPayment paymentV = new PayPalVerifyPayment();
         boolean success = false;
