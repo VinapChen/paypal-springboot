@@ -92,7 +92,7 @@ public class PaymentController {
 
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "pay/verify")
-	public String payWehook(@RequestBody JSONObject jsonObject){
+	public String payVerify(@RequestBody JSONObject jsonObject){
 		String pId = jsonObject.get("paymentId").toString();
 		String phone = jsonObject.get("phone").toString();
         String sql_uid = "select *from account where phone=" + phone;
@@ -131,6 +131,12 @@ public class PaymentController {
             System.out.println("支付校验失败");
         }
 		return null;
+	}
+	@ResponseBody
+	@RequestMapping(method = RequestMethod.POST, value = "pay/webhook")
+	public String payWebhook(@RequestBody JSONObject jsonObject){
+		System.out.println(jsonObject.toString());
+		return "success";
 	}
 
 }
