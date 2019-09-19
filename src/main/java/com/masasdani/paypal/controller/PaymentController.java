@@ -109,6 +109,7 @@ public class PaymentController {
             e.printStackTrace();
         }
 
+		JSONObject responseJson = new JSONObject();
         if (success) {
             System.out.println("支付完成");
             String sql = "select * from finace where account_id=" + uId;
@@ -127,18 +128,20 @@ public class PaymentController {
             String status = ret.get("status").toString();
             if (status.equals("0")) {
                 System.out.println("余额更新成功!");
+				responseJson.put("status",0);
             }
         } else {
             System.out.println("支付校验失败");
+			responseJson.put("status",1);
         }
-		return null;
+		return responseJson.toString();
 	}
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "pay/webhook")
 	public String payWebhook(@RequestBody JSONObject jsonObject){
 		System.out.println("===============web hook===============");
 		System.out.println(jsonObject.toString());
-		return "success";
+		return null;
 	}
 
 }
