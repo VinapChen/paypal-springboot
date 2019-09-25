@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.masasdani.paypal.service.DBHelper;
 import com.masasdani.paypal.service.PayPalVerifyPayment;
 import com.masasdani.paypal.util.HttpClientUtil;
+import com.stripe.model.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,16 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Charge;
+import com.stripe.net.RequestOptions;
+
+
 
 import java.util.Date;
 
@@ -143,5 +154,25 @@ public class PaymentController {
 		System.out.println(jsonObject.toString());
 		return null;
 	}
+
+    @ResponseBody
+    @RequestMapping(method = RequestMethod.POST, value = "pay/stripe")
+    public String payStripe(@RequestBody Token token){
+        System.out.println("===============Stripe Pay===============");
+        Stripe.apiKey = "sk_test_...";
+
+        Map<String, Object> chargeMap = new HashMap<String, Object>();
+        chargeMap.put("amount", 100);
+        chargeMap.put("currency", "usd");
+        chargeMap.put("source", token); // obtained via Stripe.js
+
+        try {
+            Charge charge = Charge.create(chargeMap);
+            System.out.println("stripe charge:" + charge);
+        } catch (StripeException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }

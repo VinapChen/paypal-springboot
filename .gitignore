@@ -3,3 +3,5 @@
 .settings
 target
 paypal-springboot.iml
+*.ipr
+*.iws
