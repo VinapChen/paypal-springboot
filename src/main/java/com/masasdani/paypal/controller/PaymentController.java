@@ -171,7 +171,7 @@ public class PaymentController {
         Stripe.apiKey = "";
 
         Map<String, Object> chargeMap = new HashMap<String, Object>();
-        chargeMap.put("amount", 100);
+        chargeMap.put("amount", amount*100);
         chargeMap.put("currency", "usd");
         chargeMap.put("source", tokenId); // obtained via Stripe.js
 
