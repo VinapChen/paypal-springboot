@@ -160,20 +160,20 @@ public class PaymentController {
     public String payStripe(@RequestBody JSONObject jsonObject){
         System.out.println("===============Stripe Pay===============");
 
-        Token token = (Token) jsonObject.get("token");
+        String tokenId = jsonObject.get("token").toString();
         String phone = jsonObject.get("phone").toString();
         String sql_uid = "select *from account where phone=" + phone;
         int uId = DBHelper.select_data(sql_uid,"id");
         Double amount = Double.parseDouble(jsonObject.get("amount").toString());
         System.out.println(new Date());
-        System.out.println("token:"+token+" uid:"+uId+" amount:"+amount);
+        System.out.println("token:"+tokenId+" uid:"+uId+" amount:"+amount);
 
         Stripe.apiKey = "";
 
         Map<String, Object> chargeMap = new HashMap<String, Object>();
         chargeMap.put("amount", 100);
         chargeMap.put("currency", "usd");
-        chargeMap.put("source", token); // obtained via Stripe.js
+        chargeMap.put("source", tokenId); // obtained via Stripe.js
 
         try {
             Charge charge = Charge.create(chargeMap);
