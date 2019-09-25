@@ -157,9 +157,18 @@ public class PaymentController {
 
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST, value = "pay/stripe")
-    public String payStripe(@RequestBody Token token){
+    public String payStripe(@RequestBody JSONObject jsonObject){
         System.out.println("===============Stripe Pay===============");
-        Stripe.apiKey = "sk_test_...";
+
+        Token token = (Token) jsonObject.get("token");
+        String phone = jsonObject.get("phone").toString();
+        String sql_uid = "select *from account where phone=" + phone;
+        int uId = DBHelper.select_data(sql_uid,"id");
+        Double amount = Double.parseDouble(jsonObject.get("amount").toString());
+        System.out.println(new Date());
+        System.out.println("token:"+token+" uid:"+uId+" amount:"+amount);
+
+        Stripe.apiKey = "";
 
         Map<String, Object> chargeMap = new HashMap<String, Object>();
         chargeMap.put("amount", 100);
