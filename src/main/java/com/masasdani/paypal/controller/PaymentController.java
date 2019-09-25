@@ -42,6 +42,8 @@ import com.stripe.net.RequestOptions;
 
 import java.util.Date;
 
+import static oracle.jrockit.jfr.events.Bits.intValue;
+
 @Controller
 @RequestMapping("/")
 public class PaymentController {
@@ -171,7 +173,7 @@ public class PaymentController {
         Stripe.apiKey = "";
 
         Map<String, Object> chargeMap = new HashMap<String, Object>();
-        chargeMap.put("amount", amount*100);
+        chargeMap.put("amount", intValue(amount*100));
         chargeMap.put("currency", "usd");
         chargeMap.put("source", tokenId); // obtained via Stripe.js
 
