@@ -177,13 +177,40 @@ public class PaymentController {
         chargeMap.put("currency", "usd");
         chargeMap.put("source", tokenId); // obtained via Stripe.js
 
+        JSONObject responseJson = new JSONObject();
+
         try {
             Charge charge = Charge.create(chargeMap);
-            System.out.println("stripe charge:" + charge);
+            System.out.println("stripe charge:" + charge.getAmount() + charge.getCurrency() + "," + charge.getStatus());
+            if (charge.getStatus().equals("succeeded")) {
+                System.out.println("支付完成");
+                String sql = "select * from finace where account_id=" + uId;
+                double balance = DBHelper.select_data(sql,"balance") + amount*100;
+
+//            String sql1 = "update finace set balance=? where account_id=" + uId;
+//            DBHelper.update_balance(sql1,balance);
+                final JSONObject financeJson = new JSONObject();
+                try {
+                    financeJson.put("uid", uId);
+                    financeJson.put("balance", balance);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                JSONObject ret = HttpClientUtil.doPost("http://abj-elogic-test1.yunba.io:9002/admin_api/finace?appkey=56a0a88c4407a3cd028ac2fe",financeJson);
+                String status = ret.get("status").toString();
+                if (status.equals("0")) {
+                    System.out.println("余额更新成功!");
+                    responseJson.put("status",0);
+                }
+            }
+            else {
+                System.out.println("支付校验失败");
+                responseJson.put("status",1);
+            }
         } catch (StripeException e) {
             e.printStackTrace();
         }
-        return null;
+        return responseJson.toString();
     }
 
 }
