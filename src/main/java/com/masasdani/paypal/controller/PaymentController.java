@@ -181,7 +181,7 @@ public class PaymentController {
 
         try {
             Charge charge = Charge.create(chargeMap);
-            System.out.println("stripe charge:" + charge.getAmount() + charge.getCurrency() + "," + charge.getStatus());
+//            System.out.println("stripe charge:" + charge.getAmount() + charge.getCurrency() + "," + charge.getStatus());
             if (charge.getStatus().equals("succeeded")) {
                 System.out.println("支付完成");
                 String sql = "select * from finace where account_id=" + uId;

@@ -95,6 +95,15 @@
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>com.masasdani.paypal.Application</mainClass>
+					<layout>JAR</layout>
+				</configuration>
+        	</plugin>
 		</plugins>
 	</build>
 </project>
